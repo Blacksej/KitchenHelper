@@ -7,7 +7,7 @@ import dev.danieltm.kitchenhelper.models.Ingredient
 
 @Database(
     entities = [Ingredient::class],
-    version = 1
+    version = 3
 )
 abstract class IngredientDatabase: RoomDatabase() {
     abstract val dao: IngredientDao

@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 interface IngredientDao {
 
     @Upsert
-    fun upsertIngredient(ingredient: Ingredient)
+    suspend fun upsertIngredient(ingredient: Ingredient)
 
     @Delete
     suspend fun deleteIngredient(ingredient: Ingredient)
