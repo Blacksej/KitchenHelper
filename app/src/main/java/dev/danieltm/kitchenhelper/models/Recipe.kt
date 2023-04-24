@@ -4,10 +4,10 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity
-data class Ingredient(
-    val category: String,
-    val ingredientName: String,
+data class Recipe(
+    val recipeName: String,
+    val recipeLink: String,
 
     @PrimaryKey(autoGenerate = true)
-    val ingredientId: Int = 0
+    val recipeId: Int = 0
 )
