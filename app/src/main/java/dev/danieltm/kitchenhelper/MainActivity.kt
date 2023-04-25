@@ -56,7 +56,7 @@ class MainActivity : ComponentActivity() {
 
         val dao = RecipeDatabase.getInstance(this).dao
 
-        val ingredientViewModel by viewModels<IngredientViewModel>(
+        /*val ingredientViewModel by viewModels<IngredientViewModel>(
             factoryProducer = {
                 object : ViewModelProvider.Factory{
                     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
@@ -64,17 +64,19 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
-        )
+        )*/
 
         val recipeViewModel by viewModels<RecipeViewModel>(
             factoryProducer = {
                 object : ViewModelProvider.Factory{
-                    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+                    override fun <T : ViewModel> create(modelClass: Class<T>): T {
                         return RecipeViewModel(dao) as T
                     }
                 }
             }
         )
+
+        //val recipeViewModel: RecipeViewModel by viewModels()
 
         val ingredients = listOf(
             Ingredient(
@@ -115,18 +117,18 @@ class MainActivity : ComponentActivity() {
         )
 
         val recipeIngredientRelations = listOf(
-            RecipeIngredientCrossRef(0, 0),
-            RecipeIngredientCrossRef(0, 1),
-            RecipeIngredientCrossRef(0, 2),
-
             RecipeIngredientCrossRef(1, 0),
             RecipeIngredientCrossRef(1, 1),
             RecipeIngredientCrossRef(1, 2),
-            RecipeIngredientCrossRef(1, 4),
 
-            RecipeIngredientCrossRef(2, 4),
             RecipeIngredientCrossRef(2, 0),
-            RecipeIngredientCrossRef(2, 1)
+            RecipeIngredientCrossRef(2, 1),
+            RecipeIngredientCrossRef(2, 2),
+            RecipeIngredientCrossRef(2, 4),
+
+            RecipeIngredientCrossRef(3, 4),
+            RecipeIngredientCrossRef(3, 0),
+            RecipeIngredientCrossRef(3, 1)
         )
 
         lifecycleScope.launch{
@@ -135,14 +137,20 @@ class MainActivity : ComponentActivity() {
             recipeIngredientRelations.forEach { dao.upsertRecipeIngredientCrossRef(it) }
         }
 
-
         setContent {
             KitchenHelperTheme {
                 /*val state by ingredientViewModel.state.collectAsState()
                 IngredientScreen(state = state, onEvent = viewModel::onEvent)
                  */
 
-                RecipesScreen(recipeViewModel = recipeViewModel)
+                val isLoading by recipeViewModel.isLoading.collectAsState()
+
+                if(isLoading){
+                    CircularProgressIndicator()
+                }
+                else{
+                    RecipesScreen(recipeViewModel = recipeViewModel)
+                }
             }
         }
     }

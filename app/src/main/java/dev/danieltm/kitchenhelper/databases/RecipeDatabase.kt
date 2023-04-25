@@ -11,7 +11,7 @@ import dev.danieltm.kitchenhelper.relations.RecipeIngredientCrossRef
 
 @Database(
     entities = [Ingredient::class, Recipe::class, RecipeIngredientCrossRef::class],
-    version = 7
+    version = 16
 )
 abstract class RecipeDatabase: RoomDatabase() {
     abstract val dao: IngredientDao

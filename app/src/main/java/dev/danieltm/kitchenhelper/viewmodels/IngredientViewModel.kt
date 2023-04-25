@@ -15,7 +15,7 @@ class IngredientViewModel(
     private val dao: IngredientDao
 ): ViewModel() {
 
-    private val _sortType = MutableStateFlow(SortType.CATEGORY_NAME)
+    /*private val _sortType = MutableStateFlow(SortType.CATEGORY_NAME)
 
     // Whenever our _sortType changes it returns a new flow and get the contacts from that flow
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -94,4 +94,5 @@ class IngredientViewModel(
             }
         }
     }
+    */
 }

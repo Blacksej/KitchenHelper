@@ -8,80 +8,50 @@ import dev.danieltm.kitchenhelper.models.Recipe
 import dev.danieltm.kitchenhelper.models.RecipeState
 import dev.danieltm.kitchenhelper.utilities.RecipeEvent
 import dev.danieltm.kitchenhelper.utilities.SortType
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 
 class RecipeViewModel(
     private val dao: IngredientDao
 ): ViewModel() {
 
     // Recipe UI state
-    private val _recipeState = MutableStateFlow(RecipeState())
+    private val _recipes = MutableStateFlow<List<Recipe>>(emptyList())
 
     // asStateFlow() makes this mutablestateflow a read-only stateflow.
-    val recipeState: StateFlow<RecipeState> = _recipeState.asStateFlow()
+    val recipes: StateFlow<List<Recipe>> = _recipes.asStateFlow()
+
+    private val _isLoading = MutableStateFlow<Boolean>(false)
+    val isLoading: StateFlow<Boolean> = _isLoading
 
     init {
         getAllRecipes()
     }
 
-    fun getAllRecipes(){
+    fun getAllRecipes() {
 
+        viewModelScope.launch{
+            _isLoading.value = true
+            _recipes.value = withContext(Dispatchers.IO){
+                dao.getAllRecipes()
+            }
+            _isLoading.value = false
         }
+
+        /*CoroutineScope(Dispatchers.IO).launch {
+            _isLoading.value = true
+            _recipes.value = dao.getAllRecipes()
+            _isLoading.value = false
+        }*/
     }
 
-    fun onEvent(event: RecipeEvent){
-        when(event){
-            is RecipeEvent.DeleteRecipe -> {
-                viewModelScope.launch {
-                    dao.deleteRecipe(event.recipe)
-                }
-            }
-            RecipeEvent.HideDialog -> {
-                _recipeState.update { it.copy(
-                    isAddingRecipe = false
-                ) }
-            }
-            RecipeEvent.SaveRecipe -> {
-                val recipeName = _recipeState.value.recipeName
-                val recipeLink = _recipeState.value.recipeLink
-
-                if(recipeName.isBlank() || recipeLink.isBlank()){
-                    return
-                }
-
-                val recipe = Recipe(
-                    recipeName = recipeName,
-                    recipeLink = recipeLink
-                )
-
-                viewModelScope.launch {
-                    dao.upsertRecipe(recipe = recipe)
-                }
-
-                _recipeState.update { it.copy(
-                    recipeName = "",
-                    recipeLink = "",
-                    isAddingRecipe = false
-                ) }
-            }
-            is RecipeEvent.SetRecipeLink -> {
-                _recipeState.update { it.copy(
-                    recipeLink = event.recipeLink
-                ) }
-            }
-            is RecipeEvent.SetRecipeName -> {
-                _recipeState.update { it.copy(
-                    recipeName = event.recipeName
-                ) }
-            }
-            RecipeEvent.ShowDialog -> {
-                _recipeState.update { it.copy(
-                    isAddingRecipe = true
-                ) }
-            }
+    fun deleteRecipe(recipe: Recipe){
+        CoroutineScope(Dispatchers.IO).launch{
+            dao.deleteRecipeWithCascade(recipeId = recipe.recipeId)
         }
+
+        val currentList = _recipes.value.toMutableList()
+        currentList.remove(recipe)
+       _recipes.value = currentList
     }
+}

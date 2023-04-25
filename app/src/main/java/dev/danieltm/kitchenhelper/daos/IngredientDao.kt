@@ -26,6 +26,19 @@ interface IngredientDao {
     @Delete
     suspend fun deleteRecipe(recipe: Recipe)
 
+    @Query("DELETE FROM recipe WHERE recipeId = :recipeId")
+    fun deleteRecipeById(recipeId: Int)
+
+    @Query("DELETE FROM RecipeIngredientCrossRef WHERE recipeId = :recipeId")
+    fun cascadeDeletionsFromRecipe(recipeId: Int)
+
+    @Transaction
+    @Query("")
+    fun deleteRecipeWithCascade(recipeId: Int){
+        cascadeDeletionsFromRecipe(recipeId)
+        deleteRecipeById(recipeId)
+    }
+
     // QUERIES
     @Query("SELECT * FROM ingredient WHERE category = :category")
     fun getIngredientsByCategory(category: String): List<Ingredient>
