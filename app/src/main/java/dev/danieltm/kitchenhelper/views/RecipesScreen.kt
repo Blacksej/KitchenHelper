@@ -9,13 +9,11 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.danieltm.kitchenhelper.models.Recipe
 import dev.danieltm.kitchenhelper.models.RecipeState
 import dev.danieltm.kitchenhelper.utilities.IngredientEvent
@@ -23,10 +21,14 @@ import dev.danieltm.kitchenhelper.viewmodels.RecipeViewModel
 
 @Composable
 fun RecipesScreen(
-    recipeViewModel: RecipeViewModel
+    recipeViewModel: RecipeViewModel = viewModel()
 ){
 
-    val recipesList by recipeViewModel.allRecipes.collectAsState()
+    val recipeState by recipeViewModel.recipeState.collectAsState()
+
+    val recipesList = remember{
+        mutableStateListOf<Recipe>()
+    }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
