@@ -5,15 +5,72 @@ import androidx.lifecycle.viewModelScope
 import dev.danieltm.kitchenhelper.daos.IngredientDao
 import dev.danieltm.kitchenhelper.models.Ingredient
 import dev.danieltm.kitchenhelper.models.IngredientState
+import dev.danieltm.kitchenhelper.models.Recipe
 import dev.danieltm.kitchenhelper.utilities.IngredientEvent
 import dev.danieltm.kitchenhelper.utilities.SortType
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 
 class IngredientViewModel(
     private val dao: IngredientDao
 ): ViewModel() {
+
+    // Ingredient UI state
+    private val _ingredients = MutableStateFlow<List<Ingredient>>(emptyList())
+    // asStateFlow() makes this mutablestateflow a read-only stateflow.
+    val ingredients: StateFlow<List<Ingredient>> = _ingredients.asStateFlow()
+
+    private val _ingredientName = MutableStateFlow<String>("")
+    val ingredientName: StateFlow<String> = _ingredientName.asStateFlow()
+
+    private val _ingredienCategory = MutableStateFlow<String>("")
+    val ingredienCategory: StateFlow<String> = _ingredienCategory.asStateFlow()
+
+    init {
+        getAllIngredients()
+    }
+
+    fun getAllIngredients() {
+        viewModelScope.launch{
+            _ingredients.value = withContext(Dispatchers.IO){
+                dao.getAllIngredients()
+            }
+        }
+    }
+
+    fun AddIngredient(){
+        val ingredient = Ingredient(
+            category = ingredienCategory.value,
+            ingredientName = ingredientName.value
+        )
+        // Making sure to upsert ingredient to the DB.
+        CoroutineScope(Dispatchers.IO).launch {
+            dao.upsertIngredient(ingredient = ingredient)
+        }
+
+        // Making sure to update the ingredients list for the UI.
+        val currentList = _ingredients.value.toMutableList()
+        currentList.add(ingredient)
+        _ingredients.value = currentList
+    }
+
+    fun deleteIngredient(ingredient: Ingredient){
+        CoroutineScope(Dispatchers.IO).launch{
+            dao.deleteIngredient(ingredient)
+        }
+
+        val currentList = _ingredients.value.toMutableList()
+        currentList.remove(ingredient)
+        _ingredients.value = currentList
+    }
+
+    fun SetIngredientName(ingredientName: String){
+        _ingredientName.value = ingredientName
+    }
+
+    fun SetIngredientCategory(ingredientCategory: String){
+        _ingredienCategory.value = ingredientCategory
+    }
 
     /*private val _sortType = MutableStateFlow(SortType.CATEGORY_NAME)
 
@@ -93,6 +150,5 @@ class IngredientViewModel(
                 _sortType.value = event.sortType
             }
         }
-    }
-    */
+    }*/
 }

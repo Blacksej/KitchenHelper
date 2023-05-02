@@ -29,7 +29,6 @@ class RecipeViewModel(
     }
 
     fun getAllRecipes() {
-
         viewModelScope.launch{
             _isLoading.value = true
             _recipes.value = withContext(Dispatchers.IO){

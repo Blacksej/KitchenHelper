@@ -18,14 +18,13 @@ import dev.danieltm.kitchenhelper.viewmodels.RecipeViewModel
 
 @Composable
 fun RecipesScreen(
-    recipeViewModel: RecipeViewModel = viewModel()
+    recipeViewModel: RecipeViewModel
 ){
-
     val recipes by recipeViewModel.recipes.collectAsState()
     //val isLoading by recipeViewModel.isLoading.collectAsState()
 
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
+            //modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ){
             items(recipes) {recipe ->
